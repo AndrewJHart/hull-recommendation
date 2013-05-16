@@ -1,7 +1,7 @@
 /*global $:true, Hull:true, marked:true */
 Hull.widget('social_md', {
   templates: ['main'],
-  refreshEvents: ['model.hull.me.change'],
+  refreshEvents: ['model.hull.me.change', 'hull.widget.social.refresh'],
   datasources: {
     doc: function () {
       "use strict";
@@ -19,9 +19,7 @@ Hull.widget('social_md', {
     this.$el.on('click', this._selectablesSelector, function () {
       that.toggleAllBut($(this));
       $(this).toggleClass('well');
-      $(this).popover('toggle');
-      var isActive = $(this).hasClass('well');
-      that.sandbox.emit('widget.social.popover', isActive ? this : undefined);
+      Hull.emit('widget.social.popover', $(this), that.loggedIn());
     });
   },
 
@@ -29,13 +27,6 @@ Hull.widget('social_md', {
   afterRender: function () {
     "use strict";
     this.$selectables = this.$el.find(this._selectablesSelector);
-    var contents;
-    if (this.loggedIn()) {
-      contents = $('#popover_template').html();
-    } else {
-      contents = $('#login_template').html();
-    }
-    this.$selectables.popover({placement:'bottom', 'title':'title', trigger:'manual', html:true, content:contents});
   },
 
   toggleAllBut: function (elt) {
