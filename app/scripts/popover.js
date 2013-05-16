@@ -1,4 +1,6 @@
+/*global $:true, Hull:true */
 $(function () {
+  "use strict";
   $('#render').on('click', '.login', function () {
     Hull.login('twitter');
   });
@@ -10,7 +12,7 @@ $(function () {
   function assignPopOver (elt, sig, contents) {
     contents = $(contents).attr('data-related-sig', sig);
     elt.popover('destroy');
-    elt.popover({placement:'bottom', 'title':'title', trigger:'manual', html:true, content:contents[0].outerHTML});
+    elt.popover({placement:'bottom', 'title':'What do you think?', trigger:'manual', html:true, content:contents[0].outerHTML});
     elt.popover('show');
   }
 
@@ -18,22 +20,27 @@ $(function () {
     return Hull.data.api('~' + _sig);
   }
 
-  function hasLiked (obj) {
+  function countLikes (obj) {
+    return Hull.data.api(obj.id + '/liked');
+  }
+
+  function checkUserHasLiked (obj) {
     return Hull.data.api('me/liked/' + obj.id);
   }
 
   function manageEntity (_sig, _elt, contents) {
     findEntity(_sig)
-      .then(hasLiked)
+      .then(checkUserHasLiked)
       .then(function (res) {
         contents.find(res ? '.like' : '.unlike').hide();
         assignPopOver(_elt, _sig, contents);
-    });
+      }
+    );
   }
 
   Hull.on('widget.social.popover', function (_elt, loggedIn) {
-    var contents, _elt = $(_elt);
-    var _sig = btoa(_elt.html());
+    _elt = $(_elt);
+    var contents, _sig = btoa(_elt.html());
     if (loggedIn) {
       contents = $('#popover_template').clone();
       manageEntity(_sig, _elt, contents);
@@ -44,17 +51,21 @@ $(function () {
     contents.attr('id', null);
   });
 
-  $('#render').on('click', '.unlike', function () {
-    var sig = $(this).parents('[data-related-sig]').attr('data-related-sig');
-    Hull.data.api.delete('~' + sig + '/likes').then(function (obj) {
-      Hull.emit('hull.widget.social.refresh');
-    });
-  });
 
-  $('#render').on('click', '.like', function () {
-    var sig = $(this).parents('[data-related-sig]').attr('data-related-sig');
-    Hull.data.api.post('~' + sig + '/likes').then(function (obj) {
-      Hull.emit('hull.widget.social.refresh');
+  /**
+   * Handles Likes/Unlikes
+   */
+  var toggles = ['like', 'unlike'], $rootElt = $('#render');
+  toggles.forEach(function (action) {
+    var className = '.' + action;
+    var method = action === 'like' ? 'post' : 'delete';
+
+    $rootElt.on('click', className, function () {
+      var sig = $(this).parents('[data-related-sig]').attr('data-related-sig'),
+        uri = '~' + sig + '/likes';
+      Hull.data.api[method](uri).then(function () {
+        Hull.emit('hull.widget.social.refresh');
+      });
     });
   });
 });
