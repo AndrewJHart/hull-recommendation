@@ -19,6 +19,8 @@ Hull.widget('social_md', {
       that.toggleAllBut($(this));
       $(this).toggleClass('well');
       $(this).popover('toggle');
+      var isActive = $(this).hasClass('well');
+      that.sandbox.emit('widget.social.popover', isActive ? this : undefined);
     });
   },
 
@@ -26,7 +28,7 @@ Hull.widget('social_md', {
   afterRender: function () {
     "use strict";
     this.$selectables = this.$el.find(this._selectablesSelector);
-    this.$selectables.popover({placement: 'bottom', 'title': 'title', trigger:'manual', content: 'Ole'});
+    this.$selectables.popover({placement: 'bottom', 'title': 'title', trigger:'manual',html: true, content: 'Ole'});
   },
 
   toggleAllBut: function (elt) {
