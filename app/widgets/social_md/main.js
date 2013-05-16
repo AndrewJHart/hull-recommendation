@@ -19,7 +19,11 @@ Hull.widget('social_md', {
     this.$el.on('click', this._selectablesSelector, function () {
       that.toggleAllBut($(this));
       $(this).toggleClass('well');
-      Hull.emit('widget.social.popover', $(this), that.loggedIn());
+      if ($(this).hasClass('well')) {
+        Hull.emit('widget.social.popover', $(this), that.loggedIn());
+      } else {
+        $(this).popover('hide');
+      }
     });
   },
 
