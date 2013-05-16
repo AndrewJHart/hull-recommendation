@@ -3,15 +3,22 @@
   <head>
     <meta charset="utf-8">
     <title>Hullo World!</title>
+    <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
     <!-- build:css application.css -->
     <link rel="stylesheet" href="./styles/main.css">
     <!-- endbuild -->
   </head>
   <body>
 
-    <div data-hull-widget="hullo"></div>
+    <div data-hull-widget="social_md" data-hull-src-selector="#my_markdown_document"></div>
 
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+    <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+
+    <!-- build:js vendor.js -->
+    <script src="scripts/marked.js"></script>
+    <!-- endbuild -->
+
     <script src="//js.hull.dev/dist/develop/hull.js"></script>
 
     <!-- build:js application.js -->
@@ -19,5 +26,18 @@
     <script src="scripts/templates.js"></script>
     <script src="scripts/widgets.js"></script>
     <!-- endbuild -->
+
+
+
+
+
+    <script type="text/x-markdown" id="my_markdown_document">
+# 'Tis awesome!
+
+Freaking awesome __markdown__ document.
+
+> Markdown is a wonderful tool full of amazing awesomeness (_Romain Dardour_, CEO of [hull.io](http://hull.io))
+
+    </script>
   </body>
 </html>

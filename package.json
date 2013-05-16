@@ -38,5 +38,7 @@
     "matchdep": "~0.1.1"
   },
   "keywords": [],
-  "dependencies": {}
+  "dependencies": {
+    "marked": "~0.2.8"
+  }
 }

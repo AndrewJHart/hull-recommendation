@@ -126,6 +126,11 @@ module.exports = function (grunt) {
     },
 
     copy: {
+      marked: {
+        files: [
+          { dest: 'app/scripts/marked.js', src: 'node_modules/marked/lib/marked.js' }
+        ]
+      },
       dist: {
         files: [
           { dest: 'dist/index.php', src: 'dist/index.html' },
@@ -193,7 +198,10 @@ module.exports = function (grunt) {
     'watch'
   ]);
 
+  grunt.registerTask('prepare', ['copy:marked']);
+
   grunt.registerTask('build', [
+    'prepare',
     'clean:dist',
     'concat',
     'jshint',
