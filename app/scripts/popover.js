@@ -9,12 +9,26 @@ $(function () {
   });
 
 
-  function assignPopOver (elt, sig, contents) {
+  function applyPopOver (elt, sig, contents) {
     contents = $(contents).attr('data-related-sig', sig);
     elt.popover('destroy');
-    elt.popover({placement:'bottom', 'title':'What do you think?', trigger:'manual', html:true, content:contents[0].outerHTML});
+    elt.popover({placement:'bottom', 'title':'What do you think?', trigger:'manual', html:true, content:contents});
     elt.popover('show');
   }
+
+  function applyTemplating(contents, res, count, ppl) {
+    contents.find(res ? '.like' : '.unlike').hide();
+    contents.find('.countLikes').text(count ? count + ' recommendations' : 'No recommendation');
+    $.each(ppl, function (idx, data) {
+      var user = data.user;
+      var $media = $('#user_template').clone();
+      $media.find('img').attr('src', user.picture);
+      $media.find('.media-heading').text(user.name);
+      contents.find('.recommendations').append($media);
+    });
+    return contents;
+  }
+
 
   function findEntity (_sig) {
     return Hull.data.api('~' + _sig);
@@ -24,16 +38,23 @@ $(function () {
     return Hull.data.api(obj.id + '/liked');
   }
 
+  function whoLikedEntity (obj) {
+    return Hull.data.api(obj.id + '/likes');
+  }
+
   function checkUserHasLiked (obj) {
     return Hull.data.api('me/liked/' + obj.id);
   }
 
-  function manageEntity (_sig, _elt, contents) {
-    findEntity(_sig)
-      .then(checkUserHasLiked)
-      .then(function (res) {
-        contents.find(res ? '.like' : '.unlike').hide();
-        assignPopOver(_elt, _sig, contents);
+  function fetchHullData (_sig, _elt, contents) {
+    var entityPromise = findEntity(_sig);
+    var countLikesPromise = entityPromise.then(function (ent) { return ent.stats.likes || 0; });
+    var hasLikedPromise = entityPromise.then(checkUserHasLiked);
+    var whoLikedPromise = entityPromise.then(whoLikedEntity);
+    $.when(contents, hasLikedPromise, countLikesPromise, whoLikedPromise)
+      .then(applyTemplating)
+      .then(function (contents) {
+        applyPopOver(_elt, _sig, contents);
       }
     );
   }
@@ -43,10 +64,10 @@ $(function () {
     var contents, _sig = btoa(_elt.html());
     if (loggedIn) {
       contents = $('#popover_template').clone();
-      manageEntity(_sig, _elt, contents);
+      fetchHullData(_sig, _elt, contents);
     } else {
       contents = $('#login_template').clone();
-      assignPopOver(_elt, _sig, contents);
+      applyPopOver(_elt, _sig, contents);
     }
     contents.attr('id', null);
   });
