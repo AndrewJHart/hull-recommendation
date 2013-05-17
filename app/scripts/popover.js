@@ -1,23 +1,66 @@
 /*global $:true, Hull:true */
 $(function () {
   "use strict";
-  $('#render').on('click', '.login', function () {
-    Hull.login('twitter');
-  });
-  $('#render').on('click', '.logout', function () {
-    Hull.logout();
+  var container = $('<div>'),
+      _selectablesSelector = 'p,h1,h2,h3,h4,h5,h6';
+
+  $.ajax('/README.md').then(function (res) {
+    var _doc = marked(res);
+    container.append(_doc);
+    $('body').append(container);
+    container.on('click', _selectablesSelector, toggleOnClick);
   });
 
 
-  function applyPopOver (elt, sig, contents) {
-    contents = $(contents).attr('data-related-sig', sig);
+  function toggleOnClick() {
+    $(this).toggleClass('well');
+    var isActive = $(this).hasClass('well');
+    resetAllExcept(isActive ? $(this) : undefined);
+    if (isActive) {
+      showMeLuv($(this));
+    }
+  }
+
+  function resetAllExcept(except) {
+    container.find(_selectablesSelector).not(except).popover('destroy');
+    container.find(_selectablesSelector).not(except).removeClass('well');
+  }
+
+  $.each(['login', 'logout'], function (index, action) {
+    container.on('click', '.' + action, function () {
+      Hull[action]('twitter');
+    });
+  });
+
+  /**
+   * Handles Recommendation handlers
+   */
+  function addEventListeners(elt, sig) {
+    $.each(['like', 'unlike'], function (index, action) {
+      var method = action === 'like' ? 'post' : 'delete';
+
+      elt.on('click', '.' + action, function () {
+        var uri = '~' + sig + '/likes';
+        Hull.data.api(uri, method).then(resetAllExcept.bind(undefined, undefined));
+      });
+    });
+  }
+
+
+
+  function isHullUserLoggedIn () {
+    return !!Hull.me.get('identities');
+  }
+
+  function createPopOver(elt, sig, contents) {
+    addEventListeners(contents, sig);
     elt.popover('destroy');
     elt.popover({placement:'bottom', 'title':'What do you think?', trigger:'manual', html:true, content:contents});
     elt.popover('show');
   }
 
-  function applyTemplating(contents, res, count, ppl) {
-    contents.find(res ? '.like' : '.unlike').hide();
+  function applyTemplating(contents, isLiked, count, ppl) {
+    contents.find(isLiked ? '.like' : '.unlike').hide();
     contents.find('.countLikes').text(count ? count + ' recommendations' : 'No recommendation');
     $.each(ppl, function (idx, data) {
       var user = data.user;
@@ -30,63 +73,43 @@ $(function () {
   }
 
 
-  function findEntity (_sig) {
+  function findEntity(_sig) {
     return Hull.data.api('~' + _sig);
   }
 
-  function countLikes (obj) {
-    return Hull.data.api(obj.id + '/liked');
-  }
-
-  function whoLikedEntity (obj) {
+  function whoLikedEntity(obj) {
     return Hull.data.api(obj.id + '/likes');
   }
 
-  function checkUserHasLiked (obj) {
+  function checkUserHasLiked(obj) {
     return Hull.data.api('me/liked/' + obj.id);
   }
 
-  function fetchHullData (_sig, _elt, contents) {
-    var entityPromise = findEntity(_sig);
-    var countLikesPromise = entityPromise.then(function (ent) { return ent.stats.likes || 0; });
-    var hasLikedPromise = entityPromise.then(checkUserHasLiked);
-    var whoLikedPromise = entityPromise.then(whoLikedEntity);
-    $.when(contents, hasLikedPromise, countLikesPromise, whoLikedPromise)
-      .then(applyTemplating)
-      .then(function (contents) {
-        applyPopOver(_elt, _sig, contents);
-      }
-    );
+  function fetchHullData(_sig) {
+    var entityPromise = findEntity(_sig),
+        countLikesPromise = entityPromise.then(function (ent) { return ent.stats.likes || 0; }),
+        hasLikedPromise = entityPromise.then(checkUserHasLiked),
+        whoLikedPromise = entityPromise.then(whoLikedEntity);
+    return $.when(hasLikedPromise, countLikesPromise, whoLikedPromise);
   }
 
-  Hull.on('widget.social.popover', function (_elt, loggedIn) {
-    _elt = $(_elt);
-    var contents, _sig = btoa(_elt.html());
+  function showMeLuv(_elt) {
+    var $elt = $(_elt),
+        loggedIn = isHullUserLoggedIn(),
+        _sig = btoa($elt.html()),
+        contents;
+
     if (loggedIn) {
       contents = $('#popover_template').clone();
-      fetchHullData(_sig, _elt, contents);
+      fetchHullData(_sig)
+        .then(applyTemplating.bind(undefined, contents))
+        .then(createPopOver.bind(undefined, $elt, _sig, contents));
     } else {
       contents = $('#login_template').clone();
-      applyPopOver(_elt, _sig, contents);
+      createPopOver($elt, _sig, contents);
     }
-    contents.attr('id', null);
-  });
+    contents.attr('id', null); // This is a clone of an element with an ID
+  }
 
-
-  /**
-   * Handles Likes/Unlikes
-   */
-  var toggles = ['like', 'unlike'], $rootElt = $('#render');
-  toggles.forEach(function (action) {
-    var className = '.' + action;
-    var method = action === 'like' ? 'post' : 'delete';
-
-    $rootElt.on('click', className, function () {
-      var sig = $(this).parents('[data-related-sig]').attr('data-related-sig'),
-        uri = '~' + sig + '/likes';
-      Hull.data.api[method](uri).then(function () {
-        Hull.emit('hull.widget.social.refresh');
-      });
-    });
-  });
+  Hull.on('model.hull.me.change', resetAllExcept.bind(undefined, undefined));
 });

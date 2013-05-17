@@ -126,6 +126,11 @@ module.exports = function (grunt) {
     },
 
     copy: {
+      readme: {
+        files: [
+          { dest: 'app/README.md', src: 'README.md' }
+        ]
+      },
       marked: {
         files: [
           { dest: 'app/scripts/marked.js', src: 'node_modules/marked/lib/marked.js' }
@@ -198,7 +203,7 @@ module.exports = function (grunt) {
     'watch'
   ]);
 
-  grunt.registerTask('prepare', ['copy:marked']);
+  grunt.registerTask('prepare', ['copy:marked', 'copy:readme']);
 
   grunt.registerTask('build', [
     'prepare',
