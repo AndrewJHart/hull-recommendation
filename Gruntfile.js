@@ -181,6 +181,15 @@ module.exports = function (grunt) {
         src: ['app/widgets/**/*.js'],
         dest: 'app/scripts/widgets.js'
       }
+    },
+
+    docco: {
+      dist: {
+        src: ['app/scripts/popover.js'],
+        options: {
+          output: 'app/docs/'
+        }
+      }
     }
 
   });
