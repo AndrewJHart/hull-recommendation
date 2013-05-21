@@ -121,9 +121,9 @@ $(function () {
     contents.find('.countLikes').text(count ? count + ' recommendations' : 'No recommendation');
     $.each(ppl, function (idx, data) {
       var user = data.user;
-      var $media = $('#user_template').clone();
-      $media.find('img').attr('src', user.picture);
-      $media.find('.media-heading').text(user.name);
+      var $media = $('#user_template').children().clone();
+      $media.find('img').attr('src', user.picture)
+                        .attr('title', user.name);
       contents.find('.recommendations').append($media);
     });
     return contents;
@@ -186,13 +186,16 @@ $(function () {
 
     if (loggedIn) {
       showLoadingOnSelectable($elt);
-      contents = $('#popover_template').clone();
+      contents = $('#popover_template').children().clone();
       fetchHullData(_sig)
         .then(checkNewerRequest)
         .then(applyTemplating.bind(undefined, contents))
-        .then(createPopOver.bind(undefined, $elt, _sig));
+        .then(createPopOver.bind(undefined, $elt, _sig))
+        .then(function(){
+          $('[data-toggle="tooltip"]').tooltip();
+        });
     } else {
-      contents = $('#login_template').clone();
+      contents = $('#login_template').children().clone();
       createPopOver($elt, _sig, contents);
     }
     contents.attr('id', null); // This is a clone of an element with an ID

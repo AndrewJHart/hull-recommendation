@@ -1,0 +1,11 @@
+.users > li{
+  display:inline;
+}
+  .users-picture{
+    border-radius:1px;
+  }
+
+.popover{
+  min-width:260px;
+}
+  .popover-title{ text-align:center; }
