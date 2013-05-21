@@ -108,6 +108,7 @@ $(function () {
   // We recreate popovers every time they have to be displayed
   // because their values may have changed (new users may have liked/unliked the targeted entity)
   function createPopOver(elt, sig, contents) {
+    resetAllExcept(elt);
     addEventListeners(contents, sig, elt);
     elt.popover('destroy');
     elt.popover({placement:'bottom', 'title':'What do you think?', trigger:'manual', html:true, content:contents});
@@ -153,12 +154,26 @@ $(function () {
   }
 
   // Retrieve al the data that is required to display the popover correctly
+  var req = 0;
   function fetchHullData(_sig) {
     var entityPromise = findEntity(_sig),
         countLikesPromise = entityPromise.then(function (ent) { return ent.stats.likes || 0; }),
         hasLikedPromise = entityPromise.then(checkUserHasLiked),
         whoLikedPromise = entityPromise.then(whoLikedEntity);
-    return $.when(hasLikedPromise, countLikesPromise, whoLikedPromise);
+    return $.when(++req, hasLikedPromise, countLikesPromise, whoLikedPromise);
+  }
+
+  //If the user has clicked on another selectable element while a previous
+  //request is processed, we should stop the first one befre it renders
+  //to avoid 2 consecutive or overlapping popovers
+  function checkNewerRequest(reqCount, a, b, c) {
+    var dfd = $.Deferred();
+    if (reqCount !== req) {
+      dfd.reject();
+    } else {
+      dfd.resolve(a, b, c);
+    }
+    return dfd.promise();
   }
 
   //Shows the popover related to the clicked entity
@@ -173,8 +188,9 @@ $(function () {
       showLoadingOnSelectable($elt);
       contents = $('#popover_template').clone();
       fetchHullData(_sig)
+        .then(checkNewerRequest)
         .then(applyTemplating.bind(undefined, contents))
-        .then(createPopOver.bind(undefined, $elt, _sig, contents));
+        .then(createPopOver.bind(undefined, $elt, _sig));
     } else {
       contents = $('#login_template').clone();
       createPopOver($elt, _sig, contents);
