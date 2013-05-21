@@ -1,5 +1,8 @@
 # Going barebones with Hull.data.api
 
+> __tl;dr;__ Click on the headings, paragraphs and list elements of this page
+> and rate them as you please.
+
 This tutorial is aimed at demonstrating that `hull.io` provides a dead-simple yet powerful [API](http://hull.io/docs/api) client.
 
 ## What will we do ?
