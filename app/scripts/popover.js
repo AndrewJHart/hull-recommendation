@@ -113,6 +113,7 @@ $(function () {
     elt.popover('destroy');
     elt.popover({placement:'bottom', 'title':'What do you think?', trigger:'manual', html:true, content:contents});
     elt.popover('show');
+    $('.users-picture', contents).tooltip();
   }
 
   // Values are applied to the templates
@@ -190,10 +191,7 @@ $(function () {
       fetchHullData(_sig)
         .then(checkNewerRequest)
         .then(applyTemplating.bind(undefined, contents))
-        .then(createPopOver.bind(undefined, $elt, _sig))
-        .then(function(){
-          $('.users-picture').tooltip();
-        });
+        .then(createPopOver.bind(undefined, $elt, _sig));
     } else {
       contents = $('#login_template').children().clone();
       createPopOver($elt, _sig, contents);
