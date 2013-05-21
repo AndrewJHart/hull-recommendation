@@ -1,5 +1,5 @@
 Hull.init({
-  appId: "5193acb7a27a13007b000003",
-  orgUrl: "http://maisheull.hullapp.dev",
+  appId: "519b47ea1988b075b90000e1",
+  orgUrl: "http://hull-demos.hullapp.io",
   debug: true
 });
