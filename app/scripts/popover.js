@@ -85,13 +85,15 @@ $(function () {
     });
   });
 
-  function addEventListeners(elt, sig) {
+  function addEventListeners(elt, sig, origin) {
     $.each(['like', 'unlike'], function (index, action) {
       var method = action === 'like' ? 'post' : 'delete';
 
       elt.on('click', '.' + action, function () {
         var uri = '~' + sig + '/likes';
-        Hull.data.api(uri, method).then(resetAllExcept.bind(undefined, undefined));
+        Hull.data.api(uri, method)
+          .then(resetAllExcept.bind(undefined, origin))
+          .then(showMeLuv.bind(undefined, origin));
       });
     });
   }
@@ -106,7 +108,7 @@ $(function () {
   // We recreate popovers every time they have to be displayed
   // because their values may have changed (new users may have liked/unliked the targeted entity)
   function createPopOver(elt, sig, contents) {
-    addEventListeners(contents, sig);
+    addEventListeners(contents, sig, elt);
     elt.popover('destroy');
     elt.popover({placement:'bottom', 'title':'What do you think?', trigger:'manual', html:true, content:contents});
     elt.popover('show');
@@ -181,5 +183,9 @@ $(function () {
   }
 
   // This event handler is triggered when the user logs in /out.
-  Hull.on('model.hull.me.change', resetAllExcept.bind(undefined, undefined));
+  Hull.on('model.hull.me.change', function () {
+    $(_selectablesSelector, container).filter('.well').each(function () {
+      showMeLuv(this);
+    });
+  });
 });
