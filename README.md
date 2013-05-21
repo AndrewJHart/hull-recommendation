@@ -16,7 +16,7 @@ once logged in with Twitter, can review these entities.
 ### Source code, please!
 
 The magic is contained in the file located at `app/scripts/popover.js`, which you can see the
-[complete annotated source code here](./app/docs/popover.html);
+[complete annotated source code here](./docs/popover.html);
 
 The complete source code of the project is available [here on github](http://github.com/hull/review_demo).
 Please note that the project has been generated with our [grunt-init template](https://github.com/hull/grunt-init-hull),
