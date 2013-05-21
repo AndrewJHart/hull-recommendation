@@ -43,6 +43,7 @@ Then run the following commands:
 npm install
 grunt prepare
 grunt server
+```
 
 `grunt server` will start a server listening on port `9000` which you can use for development purpose.
 
