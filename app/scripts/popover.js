@@ -192,7 +192,7 @@ $(function () {
         .then(applyTemplating.bind(undefined, contents))
         .then(createPopOver.bind(undefined, $elt, _sig))
         .then(function(){
-          $('[data-toggle="tooltip"]').tooltip();
+          $('.users-picture').tooltip();
         });
     } else {
       contents = $('#login_template').children().clone();
