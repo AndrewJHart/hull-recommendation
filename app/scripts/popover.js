@@ -28,7 +28,7 @@
 //
 $(function () {
   "use strict";
-  var container = $('<div>').appendTo('body'),
+  var container = $('<div class="container">').appendTo('body'),
       // The set of HTML elements we want to be able to select and review
       _selectablesSelector = 'p,h1,h2,h3,h4,h5,h6';
 
@@ -41,6 +41,12 @@ $(function () {
     container.append(_doc);
   });
 
+  function showLoadingOnSelectable($elt) {
+    $elt
+      .popover('destroy')
+      .popover({placement:'bottom', 'title':'', trigger:'manual', content:'Loading'})
+      .popover('show');
+  }
 
   // Here we just make sure that there can not be 2 active elements at the same time.
   function toggleOnClick() {
@@ -94,7 +100,7 @@ $(function () {
 
   // This is how you can detect whether the current user is logged in regards to [hull.io](http://hull.io)
   function isHullUserLoggedIn () {
-    return !!Hull.me.get('identities');
+    return Hull.me && !!Hull.me.get('identities');
   }
 
   // We recreate popovers every time they have to be displayed
@@ -162,6 +168,7 @@ $(function () {
         contents;
 
     if (loggedIn) {
+      showLoadingOnSelectable($elt);
       contents = $('#popover_template').clone();
       fetchHullData(_sig)
         .then(applyTemplating.bind(undefined, contents))
