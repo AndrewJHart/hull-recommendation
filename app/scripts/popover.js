@@ -36,7 +36,7 @@ $(function () {
   container.on('click', _selectablesSelector, toggleOnClick);
 
   // Fetch the markdown file, compile it to HTML and append it to the DOM
-  $.ajax('/README.md').then(function (res) {
+  $.ajax('./README.md').then(function (res) {
     var _doc = marked(res);
     container.append(_doc);
   });
