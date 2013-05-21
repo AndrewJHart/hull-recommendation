@@ -80,7 +80,7 @@ for the selected element.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      _selectablesSelector = <span class="string">'p,h1,h2,h3,h4,h5,h6'</span>;</pre></div></div>
+            <div class="content"><div class='highlight'><pre>      _selectablesSelector = <span class="string">'p,h1,h2,h3,h4,h5,h6,li'</span>;</pre></div></div>
             
         </li>
         
@@ -110,7 +110,7 @@ for the selected element.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  $.ajax(<span class="string">'/README.md'</span>).then(<span class="function"><span class="keyword">function</span> <span class="params">(res)</span> {</span>
+            <div class="content"><div class='highlight'><pre>  $.ajax(<span class="string">'./README.md'</span>).then(<span class="function"><span class="keyword">function</span> <span class="params">(res)</span> {</span>
     <span class="keyword">var</span> _doc = marked(res);
     container.append(_doc);
   });
@@ -193,13 +193,15 @@ and is for excluding some elements from the reset.</p>
     });
   });
 
-  <span class="function"><span class="keyword">function</span> <span class="title">addEventListeners</span><span class="params">(elt, sig)</span> {</span>
+  <span class="function"><span class="keyword">function</span> <span class="title">addEventListeners</span><span class="params">(elt, sig, origin)</span> {</span>
     $.each([<span class="string">'like'</span>, <span class="string">'unlike'</span>], <span class="function"><span class="keyword">function</span> <span class="params">(index, action)</span> {</span>
       <span class="keyword">var</span> method = action === <span class="string">'like'</span> ? <span class="string">'post'</span> : <span class="string">'delete'</span>;
 
       elt.on(<span class="string">'click'</span>, <span class="string">'.'</span> + action, <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
         <span class="keyword">var</span> uri = <span class="string">'~'</span> + sig + <span class="string">'/likes'</span>;
-        Hull.data.api(uri, method).then(resetAllExcept.bind(<span class="literal">undefined</span>, <span class="literal">undefined</span>));
+        Hull.data.api(uri, method)
+          .then(resetAllExcept.bind(<span class="literal">undefined</span>, origin))
+          .then(showMeLuv.bind(<span class="literal">undefined</span>, origin));
       });
     });
   }</pre></div></div>
@@ -236,7 +238,8 @@ because their values may have changed (new users may have liked/unliked the targ
             </div>
             
             <div class="content"><div class='highlight'><pre>  <span class="function"><span class="keyword">function</span> <span class="title">createPopOver</span><span class="params">(elt, sig, contents)</span> {</span>
-    addEventListeners(contents, sig);
+    resetAllExcept(elt);
+    addEventListeners(contents, sig, elt);
     elt.popover(<span class="string">'destroy'</span>);
     elt.popover({placement:<span class="string">'bottom'</span>, <span class="string">'title'</span>:<span class="string">'What do you think?'</span>, trigger:<span class="string">'manual'</span>, html:<span class="literal">true</span>, content:contents});
     elt.popover(<span class="string">'show'</span>);
@@ -338,12 +341,13 @@ all the users who liked an entity to count them.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="function"><span class="keyword">function</span> <span class="title">fetchHullData</span><span class="params">(_sig)</span> {</span>
+            <div class="content"><div class='highlight'><pre>  <span class="keyword">var</span> req = <span class="number">0</span>;
+  <span class="function"><span class="keyword">function</span> <span class="title">fetchHullData</span><span class="params">(_sig)</span> {</span>
     <span class="keyword">var</span> entityPromise = findEntity(_sig),
         countLikesPromise = entityPromise.then(<span class="function"><span class="keyword">function</span> <span class="params">(ent)</span> {</span> <span class="keyword">return</span> ent.stats.likes || <span class="number">0</span>; }),
         hasLikedPromise = entityPromise.then(checkUserHasLiked),
         whoLikedPromise = entityPromise.then(whoLikedEntity);
-    <span class="keyword">return</span> $.when(hasLikedPromise, countLikesPromise, whoLikedPromise);
+    <span class="keyword">return</span> $.when(++req, hasLikedPromise, countLikesPromise, whoLikedPromise);
   }</pre></div></div>
             
         </li>
@@ -354,6 +358,31 @@ all the users who liked an entity to count them.</p>
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-16">&#182;</a>
+              </div>
+              <p>If the user has clicked on another selectable element while a previous
+request is processed, we should stop the first one befre it renders
+to avoid 2 consecutive or overlapping popovers</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="function"><span class="keyword">function</span> <span class="title">checkNewerRequest</span><span class="params">(reqCount, a, b, c)</span> {</span>
+    <span class="keyword">var</span> dfd = $.Deferred();
+    <span class="keyword">if</span> (reqCount !== req) {
+      dfd.reject();
+    } <span class="keyword">else</span> {
+      dfd.resolve(a, b, c);
+    }
+    <span class="keyword">return</span> dfd.promise();
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-17">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-17">&#182;</a>
               </div>
               <p>Shows the popover related to the clicked entity</p>
 
@@ -366,11 +395,11 @@ all the users who liked an entity to count them.</p>
         </li>
         
         
-        <li id="section-17">
+        <li id="section-18">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-17">&#182;</a>
+                <a class="pilcrow" href="#section-18">&#182;</a>
               </div>
               <p>This how we calculate the signature that will define our entity</p>
 
@@ -383,8 +412,9 @@ all the users who liked an entity to count them.</p>
       showLoadingOnSelectable($elt);
       contents = $(<span class="string">'#popover_template'</span>).clone();
       fetchHullData(_sig)
+        .then(checkNewerRequest)
         .then(applyTemplating.bind(<span class="literal">undefined</span>, contents))
-        .then(createPopOver.bind(<span class="literal">undefined</span>, $elt, _sig, contents));
+        .then(createPopOver.bind(<span class="literal">undefined</span>, $elt, _sig));
     } <span class="keyword">else</span> {
       contents = $(<span class="string">'#login_template'</span>).clone();
       createPopOver($elt, _sig, contents);
@@ -395,17 +425,21 @@ all the users who liked an entity to count them.</p>
         </li>
         
         
-        <li id="section-18">
+        <li id="section-19">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-18">&#182;</a>
+                <a class="pilcrow" href="#section-19">&#182;</a>
               </div>
               <p>This event handler is triggered when the user logs in /out.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  Hull.on(<span class="string">'model.hull.me.change'</span>, resetAllExcept.bind(<span class="literal">undefined</span>, <span class="literal">undefined</span>));
+            <div class="content"><div class='highlight'><pre>  Hull.on(<span class="string">'model.hull.me.change'</span>, <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
+    $(_selectablesSelector, container).filter(<span class="string">'.well'</span>).each(<span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
+      showMeLuv(<span class="keyword">this</span>);
+    });
+  });
 });</pre></div></div>
             
         </li>
