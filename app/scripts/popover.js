@@ -30,7 +30,7 @@ $(function () {
   "use strict";
   var container = $('<div class="container">').appendTo('body'),
       // The set of HTML elements we want to be able to select and review
-      _selectablesSelector = 'p,h1,h2,h3,h4,h5,h6';
+      _selectablesSelector = 'p,h1,h2,h3,h4,h5,h6,li';
 
   //We delegate click events on the selectables items to the container
   container.on('click', _selectablesSelector, toggleOnClick);
