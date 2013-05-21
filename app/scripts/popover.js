@@ -28,7 +28,7 @@
 //
 $(function () {
   "use strict";
-  var container = $('<div class="container">').appendTo('body'),
+  var container = $('.container'),
       // The set of HTML elements we want to be able to select and review
       _selectablesSelector = 'p,h1,h2,h3,h4,h5,h6,li';
 
