@@ -61,7 +61,4 @@ h1.logo{
   .readme_container [data-likes].well:before{
     background-color:rgba(69, 135, 206, .9);
   }
-  .readme_container [data-likes="0"]:before{
-    display:none;
-  }
-
+ 
