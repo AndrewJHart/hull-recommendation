@@ -3,7 +3,7 @@
 > __tl;dr;__ Click on the headings, paragraphs and list elements of this page
 > and rate them as you please.
 
-This tutorial is aimed at demonstrating that `hull.io` provides a dead-simple yet powerful [API](http://hull.io/docs/api) client.
+This tutorial is aimed at demonstrating that [hull.io](http://hull.io) provides a dead-simple yet powerful [API](http://hull.io/docs/api) client.
 
 ## What will we do ?
 
@@ -32,7 +32,7 @@ The demo is located on [github pages](http://hull.github.io/review_demo).
 Head on to the demo page and click on any paragraph or heading, a popover will show either:
 
 * a Login button if you're not logged in yet
-* A (un)Recommend button with the associated number of recommendations for the selected entity
+* a (un)Recommend button with the associated number of recommendations for the selected entity
 
 
 ## Fork and Install
