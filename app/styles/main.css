@@ -25,3 +25,10 @@ h1.logo{
   color:transparent;
   line-height: 0;
 }
+
+.readme_container p:before,h1:before,h2:before,h3:before,h4:before,h5:before,h6:before,li:before {
+  content: attr(data-likes) " ✔ ";
+}
+.popover p:before, .popover h1:before,.popover h2:before,.popover h3:before,.popover h4:before,.popover h5:before,.popover h6:before,.popover li:before {
+  content: "";
+}

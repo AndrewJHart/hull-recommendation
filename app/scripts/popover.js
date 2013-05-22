@@ -32,13 +32,29 @@ $(function () {
       // The set of HTML elements we want to be able to select and review
       _selectablesSelector = 'p,h1,h2,h3,h4,h5,h6,li';
 
-  //We delegate click events on the selectables items to the container
-  container.on('click', _selectablesSelector, toggleOnClick);
+  var hullStartedDeferred = $.Deferred(),
+      documentFetchedDeferred = $.Deferred();
 
-  // Fetch the markdown file, compile it to HTML and append it to the DOM
+  // We wait for Hull to be properly started before we start handling data that requires it.
+  Hull.on('hull.started', function () {
+    //We delegate click events on the selectables items to the container
+    container.on('click', _selectablesSelector, toggleOnClick);
+    hullStartedDeferred.resolve();
+  });
+
+  // Fetch the markdown file, compile it to HTML and append it to the DOM.
   $.ajax('./README.md').then(function (res) {
     var _doc = marked(res);
     container.append(_doc);
+    documentFetchedDeferred.resolve();
+  });
+
+  // Once the (Markdown) document has been fetched and added to the page and
+  // Hull isready to operate, we can start fetching data
+  $.when(hullStartedDeferred, documentFetchedDeferred).then(function () {
+    container.find(_selectablesSelector).each(function (i, elt) {
+      findEntity(elt);
+    });
   });
 
   function showLoadingOnSelectable($elt) {
@@ -93,7 +109,7 @@ $(function () {
         var uri = '~' + sig + '/likes';
         Hull.data.api(uri, method)
           .then(resetAllExcept.bind(undefined, origin))
-          .then(showMeLuv.bind(undefined, origin));
+        .then(showMeLuv.bind(undefined, origin));
       });
     });
   }
@@ -124,8 +140,8 @@ $(function () {
       var user = data.user;
       var $media = $('#user_template').children().clone();
       $media.find('img').attr('src', user.picture)
-                        .attr('title', user.name);
-      contents.find('.recommendations').append($media);
+      .attr('title', user.name);
+    contents.find('.recommendations').append($media);
     });
     return contents;
   }
@@ -135,8 +151,13 @@ $(function () {
   // it is automatically created. Whether it has to be created or not, an entity is returned by the API call.
   //
   // The function returns a pomise.
-  function findEntity(_sig) {
-    return Hull.data.api('~' + _sig);
+  function findEntity(_elt) {
+    var _sig = calculateSignature(_elt);
+    var entityPromise = Hull.data.api('~' + _sig);
+    entityPromise.then(function (entity) {
+      $(_elt).attr('data-likes', entity.stats.likes || 0);
+    });
+    return entityPromise;
   }
 
   // We want to know who liked our entity.
@@ -156,12 +177,11 @@ $(function () {
 
   // Retrieve al the data that is required to display the popover correctly
   var req = 0;
-  function fetchHullData(_sig) {
-    var entityPromise = findEntity(_sig),
-        countLikesPromise = entityPromise.then(function (ent) { return ent.stats.likes || 0; }),
-        hasLikedPromise = entityPromise.then(checkUserHasLiked),
-        whoLikedPromise = entityPromise.then(whoLikedEntity);
-    return $.when(++req, hasLikedPromise, countLikesPromise, whoLikedPromise);
+  function fetchHullData(entity) {
+    var countLikes = entity.stats.likes || 0,
+        hasLikedPromise = checkUserHasLiked(entity),
+        whoLikedPromise = whoLikedEntity(entity);
+    return $.when(++req, hasLikedPromise, countLikes, whoLikedPromise);
   }
 
   //If the user has clicked on another selectable element while a previous
@@ -177,18 +197,26 @@ $(function () {
     return dfd.promise();
   }
 
+  // This is how we calculate the signature for the selectables elements.
+  // In your own projects, you can use any method you want as long as
+  // it is base64-encoded.
+  function calculateSignature(elt) {
+    return btoa($(elt).html());
+  }
+
   //Shows the popover related to the clicked entity
   function showMeLuv(_elt) {
     var $elt = $(_elt),
         loggedIn = isHullUserLoggedIn(),
-        //This how we calculate the signature that will define our entity
-        _sig = btoa($elt.html()),
+        _sig = calculateSignature(_elt),
         contents;
 
     if (loggedIn) {
       showLoadingOnSelectable($elt);
       contents = $('#popover_template').children().clone();
-      fetchHullData(_sig)
+      var entityPromise = findEntity(_elt);
+      entityPromise
+        .then(fetchHullData)
         .then(checkNewerRequest)
         .then(applyTemplating.bind(undefined, contents))
         .then(createPopOver.bind(undefined, $elt, _sig));
