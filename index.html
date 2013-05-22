@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Hullo World!</title>
+    <link href="//hullstrap.s3.amazonaws.com/0.1/hullstrap.css" rel="stylesheet">
+    <!-- build:css application.css -->
+    <link rel="stylesheet" href="styles/main.css">
+    <!-- endbuild -->
+  </head>
+  <body>
+    
+    <script src="//code.jquery.com/jquery-2.0.0.js"></script>
+    <script src="//hullstrap.s3.amazonaws.com/0.1/hullstrap.js"></script>
+
+    <!-- build:js vendor.js -->
+    <script src="scripts/marked.js"></script>
+    <!-- endbuild -->
+
+    <script src="http://hull-js.s3.amazonaws.com/develop/hull.js"></script>
+
+    <!-- build:js application.js -->
+    <script src="scripts/hull-init.js"></script>
+    <script src="scripts/popover.js"></script>
+    <!-- endbuild -->
+
+    <!-- Termplates -->
+    <div style="display:none">
+      <div id="user_template">
+        <li>
+          <img class="users-picture" src="" title="" data-toggle="tooltip" />
+        </li>
+      </div>
+      <div id="login_template">
+        <div class="row-fluid">
+          <span class="btn btn-block login">Login</span>
+        </div>
+      </div>
+      <div id="popover_template">
+        <h5 class="text-center"><span class="countLikes"></span></h5>
+        <div class="row-fluid">
+          <ul class="users unstyled m1 text-center recommendations"></ul>
+          <div class="m1">
+            <span class="btn btn-block btn-success like">✔ Recommend</span>
+            <span class="btn btn-block btn-danger unlike">✖ Stop recommending</span>
+          </div>
+          <span class="btn btn-block btn-link logout">Logout</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Content -->
+    <div class="wrapper featurette featurette-top-shadow">
+      <div class="container">
+        <div class="row">
+          <div class="span10 offset1">
+            <h1 class="logo">hull</h1>
+            <div class="readme_container"></div> <!-- /container -->    
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Github Ribbon -->
+    <a href="https://github.com/hull/review_demo"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"></a>
+
+  </body>
+</html>

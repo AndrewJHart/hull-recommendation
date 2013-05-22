@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>popover.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>popover.js</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap for-h2">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              <h2>Purpose</h2>
+<p>The purpose of this code is to allow users to recommend (aka &#39;like or &#39;upvote&#39;)
+portions of a Markdown document, and show as a popover how many users did so, as well as
+alongside their (Twitter-based) name and avatar.</p>
+<p>Generally speaking, it demonstrates how developers can create arbitrary social entities
+in their app using <a href="http://hull.io">hull.io</a> to leverage their interactive (ie. social)
+feature set.</p>
+<h2>How is it done ?</h2>
+<p>The <a href="http://hull.io">hull.io</a> APIs grant developers with the ability to turn
+any (uniquely defined) object into a featureful social object called <code>entity</code>.</p>
+<p>To do so, the only thing to do is a call to <code>Hull.data.api(&#39;~%SIGNATURE%&#39;)</code> where <code>%SIGNATURE%</code>
+is a base64-encoded version of any data (tipycally, an ID).</p>
+<p>Entities in <a href="http://hull.io">hull.io</a> are created lazily, which means you don&#39;t have to
+explicitly create them. If an API call is performed on an entity that does no exist
+(like we do in this demo), <a href="http://hull.io">hull.io</a> will assume it is a new entity
+and will create it before it performs the action defined by the API call.</p>
+<p>In this demo, we create entities from paragraphs and headings in a Markdown document.
+The signatures are plain base64 encodings of the <code>jQuery.fn.html()</code> evaluation
+for the selected element.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="comment">/*global $:true, Hull:true */</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>;(<span class="function"><span class="keyword">function</span> <span class="params">($)</span> {</span>
+  <span class="string">"use strict"</span>;
+  $.fn.hull_like = <span class="function"><span class="keyword">function</span> <span class="params">(options)</span> {</span>
+    <span class="keyword">var</span> container = <span class="keyword">this</span>,</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <p>The set of HTML elements we want to be able to select and review</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    _selectablesSelector = options.select || <span class="string">'p'</span>,</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <p>The URL of the Markdown document to be displayed</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    _documentURL = options.file;
+
+    <span class="keyword">if</span> (!_documentURL) {
+      <span class="keyword">throw</span> <span class="keyword">new</span> Error(<span class="string">'No URL provided, can not retrieve the Markdown document'</span>);
+    }
+
+    <span class="keyword">if</span> (!Hull) {
+      <span class="keyword">throw</span> <span class="keyword">new</span> Error(<span class="string">'Hull is not available, the plugin can not proceed without it.'</span>);
+    }
+
+    <span class="keyword">var</span> hullStartedDeferred = $.Deferred(),
+        documentFetchedDeferred = $.Deferred();</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p>We wait for Hull to be properly started before we start handling data that requires it.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    Hull.on(<span class="string">'hull.started'</span>, <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <p>We delegate click events on the selectables items to the container</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      container.on(<span class="string">'click'</span>, _selectablesSelector, toggleOnClick);
+      hullStartedDeferred.resolve();
+    });</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-7">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              <p>Fetch the markdown file, compile it to HTML and append it to the DOM.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    $.ajax(_documentURL).then(<span class="function"><span class="keyword">function</span> <span class="params">(res)</span> {</span>
+      <span class="keyword">var</span> _doc = marked(res);
+      container.append(_doc);
+      documentFetchedDeferred.resolve();
+    });</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-8">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-8">&#182;</a>
+              </div>
+              <p>Once the (Markdown) document has been fetched and added to the page and
+Hull isready to operate, we can start fetching data</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    $.when(hullStartedDeferred, documentFetchedDeferred).then(<span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
+      container.find(_selectablesSelector).each(<span class="function"><span class="keyword">function</span> <span class="params">(i, elt)</span> {</span>
+        findEntity(elt);
+      });
+    });
+
+    <span class="function"><span class="keyword">function</span> <span class="title">showLoadingOnSelectable</span><span class="params">($elt)</span> {</span>
+      $elt
+        .popover(<span class="string">'destroy'</span>)
+        .popover({placement:<span class="string">'bottom'</span>, <span class="string">'title'</span>:<span class="string">''</span>, trigger:<span class="string">'manual'</span>, content:<span class="string">'Loading'</span>})
+        .popover(<span class="string">'show'</span>);
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-9">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-9">&#182;</a>
+              </div>
+              <p>Here we just make sure that there can not be 2 active elements at the same time.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">toggleOnClick</span><span class="params">()</span> {</span>
+      $(<span class="keyword">this</span>).toggleClass(<span class="string">'well'</span>);
+      <span class="keyword">var</span> isActive = $(<span class="keyword">this</span>).hasClass(<span class="string">'well'</span>);
+      resetAllExcept(isActive ? $(<span class="keyword">this</span>) : <span class="literal">undefined</span>);
+      <span class="keyword">if</span> (isActive) {
+        showMeLuv($(<span class="keyword">this</span>));
+      }
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-10">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-10">&#182;</a>
+              </div>
+              <p>Destroys all the popovers,
+sets all the elements matching <code>_selectableSelector</code> to the default state.</p>
+<p>The first parameter can be anything accepted by the <code>.not()</code> function in jQuery,
+and is for excluding some elements from the reset.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">resetAllExcept</span><span class="params">(except)</span> {</span>
+      container.find(_selectablesSelector).not(except).popover(<span class="string">'destroy'</span>);
+      container.find(_selectablesSelector).not(except).removeClass(<span class="string">'well'</span>);
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-11">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-11">&#182;</a>
+              </div>
+              <p>Registers <code>click</code> handlers. <code>%SIGNATURE%</code> is a base64-encoded data.</p>
+<ul>
+<li><code>.login</code> =&gt; `Hull.login(&#39;twitter&#39;)</li>
+<li><code>.logout</code> =&gt; <code>Hull.logout()</code> <em>(Actually calls <code>Hull.logout(&#39;twitter&#39;)</code> but the <code>&#39;twitter&#39;</code> parameter is not used)</em></li>
+<li><code>.like</code> =&gt; <code>Hull.data.api(&#39;~%SIGNATURE%/likes&#39;, &#39;post&#39;)</code></li>
+<li><code>.unlike</code> =&gt; <code>Hull.data.api(&#39;~%SIGNATURE%/likes&#39;, &#39;delete&#39;)</code></li>
+</ul>
+<p>The <code>.like</code> (resp. <code>.unlike</code>) call could also have been written
+<code>Hull.data.api.post(&#39;~%SIGNATURE%/likes&#39;)</code>
+(resp. <code>Hull.data.api.delete(&#39;~%SIGNATURE%/likes&#39;)</code>)</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    $.each([<span class="string">'login'</span>, <span class="string">'logout'</span>], <span class="function"><span class="keyword">function</span> <span class="params">(index, action)</span> {</span>
+      container.on(<span class="string">'click'</span>, <span class="string">'.'</span> + action, <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
+        Hull[action](<span class="string">'twitter'</span>);
+      });
+    });
+
+    <span class="function"><span class="keyword">function</span> <span class="title">addEventListeners</span><span class="params">(elt, sig, origin)</span> {</span>
+      $.each([<span class="string">'like'</span>, <span class="string">'unlike'</span>], <span class="function"><span class="keyword">function</span> <span class="params">(index, action)</span> {</span>
+        <span class="keyword">var</span> method = action === <span class="string">'like'</span> ? <span class="string">'post'</span> : <span class="string">'delete'</span>;
+
+        elt.on(<span class="string">'click'</span>, <span class="string">'.'</span> + action, <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
+          <span class="keyword">var</span> uri = <span class="string">'~'</span> + sig + <span class="string">'/likes'</span>;
+          Hull.data.api(uri, method)
+            .then(resetAllExcept.bind(<span class="literal">undefined</span>, origin))
+            .then(showMeLuv.bind(<span class="literal">undefined</span>, origin));
+        });
+      });
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-12">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-12">&#182;</a>
+              </div>
+              <p>This is how you can detect whether the current user is logged in regards to <a href="http://hull.io">hull.io</a></p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">isHullUserLoggedIn</span> <span class="params">()</span> {</span>
+      <span class="keyword">return</span> Hull.me &amp;&amp; !!Hull.me.get(<span class="string">'identities'</span>);
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-13">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-13">&#182;</a>
+              </div>
+              <p>We recreate popovers every time they have to be displayed
+because their values may have changed (new users may have liked/unliked the targeted entity)</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">createPopOver</span><span class="params">(elt, sig, contents)</span> {</span>
+      resetAllExcept(elt);
+      addEventListeners(contents, sig, elt);
+      elt.popover(<span class="string">'destroy'</span>);
+      elt.popover({placement:<span class="string">'bottom'</span>, <span class="string">'title'</span>:<span class="string">'What do you think?'</span>, trigger:<span class="string">'manual'</span>, html:<span class="literal">true</span>, content:contents});
+      elt.popover(<span class="string">'show'</span>);
+      $(<span class="string">'.users-picture'</span>, contents).tooltip();
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-14">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-14">&#182;</a>
+              </div>
+              <p>Values are applied to the templates</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">applyTemplating</span><span class="params">(contents, isLiked, count, ppl)</span> {</span>
+      contents.find(isLiked ? <span class="string">'.like'</span> : <span class="string">'.unlike'</span>).hide();
+      contents.find(<span class="string">'.countLikes'</span>).text(count ? count + <span class="string">' recommendations'</span> : <span class="string">'No recommendation'</span>);
+      $.each(ppl, <span class="function"><span class="keyword">function</span> <span class="params">(idx, data)</span> {</span>
+        <span class="keyword">var</span> user = data.user;
+        <span class="keyword">var</span> $media = $(<span class="string">'#user_template'</span>).children().clone();
+        $media.find(<span class="string">'img'</span>).attr(<span class="string">'src'</span>, user.picture).attr(<span class="string">'title'</span>, user.name);
+        contents.find(<span class="string">'.recommendations'</span>).append($media);
+      });
+      <span class="keyword">return</span> contents;
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-15">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-15">&#182;</a>
+              </div>
+              <p>Retrieve an entity. If the entity does not exist in <a href="http://hull.io">hull.io</a>,
+it is automatically created. Whether it has to be created or not, an entity is returned by the API call.</p>
+<p>The function returns a pomise.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">findEntity</span><span class="params">(_elt)</span> {</span>
+      <span class="keyword">var</span> _sig = calculateSignature(_elt);
+      <span class="keyword">var</span> entityPromise = Hull.data.api(<span class="string">'~'</span> + _sig);
+      entityPromise.then(<span class="function"><span class="keyword">function</span> <span class="params">(entity)</span> {</span>
+        $(_elt).attr(<span class="string">'data-likes'</span>, entity.stats.likes || <span class="number">0</span>);
+      });
+      <span class="keyword">return</span> entityPromise;
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-16">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-16">&#182;</a>
+              </div>
+              <p>We want to know who liked our entity.</p>
+<p>Getting to know how many people liked a particular entity is provided as a property
+of the entity itself (<code>my_entity.stats.likes</code>) and therefore is available
+when you retrieve the entity, which means you do not have to manually retrieve
+all the users who liked an entity to count them.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">whoLikedEntity</span><span class="params">(obj)</span> {</span>
+      <span class="keyword">return</span> Hull.data.api(obj.id + <span class="string">'/likes'</span>);
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-17">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-17">&#182;</a>
+              </div>
+              <p>Whether the current user (if any) liked the current entity</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">checkUserHasLiked</span><span class="params">(obj)</span> {</span>
+      <span class="keyword">return</span> Hull.data.api(<span class="string">'me/liked/'</span> + obj.id);
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-18">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-18">&#182;</a>
+              </div>
+              <p>Retrieve al the data that is required to display the popover correctly</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">var</span> req = <span class="number">0</span>;
+    <span class="function"><span class="keyword">function</span> <span class="title">fetchHullData</span><span class="params">(entity)</span> {</span>
+      <span class="keyword">var</span> countLikes = entity.stats.likes || <span class="number">0</span>,
+          hasLikedPromise = checkUserHasLiked(entity),
+          whoLikedPromise = whoLikedEntity(entity);
+      <span class="keyword">return</span> $.when(++req, hasLikedPromise, countLikes, whoLikedPromise);
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-19">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-19">&#182;</a>
+              </div>
+              <p>If the user has clicked on another selectable element while a previous
+request is processed, we should stop the first one befre it renders
+to avoid 2 consecutive or overlapping popovers</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">checkNewerRequest</span><span class="params">(reqCount, a, b, c)</span> {</span>
+      <span class="keyword">var</span> dfd = $.Deferred();
+      <span class="keyword">if</span> (reqCount !== req) {
+        dfd.reject();
+      } <span class="keyword">else</span> {
+        dfd.resolve(a, b, c);
+      }
+      <span class="keyword">return</span> dfd.promise();
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-20">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-20">&#182;</a>
+              </div>
+              <p>This is how we calculate the signature for the selectables elements.
+In your own projects, you can use any method you want as long as
+it is base64-encoded.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">calculateSignature</span><span class="params">(elt)</span> {</span>
+      <span class="keyword">return</span> btoa($(elt).html());
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-21">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-21">&#182;</a>
+              </div>
+              <p>Shows the popover related to the clicked entity</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">showMeLuv</span><span class="params">(_elt)</span> {</span>
+      <span class="keyword">var</span> $elt = $(_elt),
+          loggedIn = isHullUserLoggedIn(),
+          _sig = calculateSignature(_elt),
+          contents;
+
+      <span class="keyword">if</span> (loggedIn) {
+        showLoadingOnSelectable($elt);
+        contents = $(<span class="string">'#popover_template'</span>).children().clone();
+        <span class="keyword">var</span> entityPromise = findEntity(_elt);
+        entityPromise
+          .then(fetchHullData)
+          .then(checkNewerRequest)
+          .then(applyTemplating.bind(<span class="literal">undefined</span>, contents))
+          .then(createPopOver.bind(<span class="literal">undefined</span>, $elt, _sig));
+      } <span class="keyword">else</span> {
+        contents = $(<span class="string">'#login_template'</span>).children().clone();
+        createPopOver($elt, _sig, contents);
+      }
+      contents.attr(<span class="string">'id'</span>, <span class="literal">null</span>); <span class="comment">// This is a clone of an element with an ID</span>
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-22">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-22">&#182;</a>
+              </div>
+              <p>This event handler is triggered when the user logs in /out.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    Hull.on(<span class="string">'model.hull.me.change'</span>, <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
+      $(_selectablesSelector, container).filter(<span class="string">'.well'</span>).each(<span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
+        showMeLuv(<span class="keyword">this</span>);
+      });
+    });
+
+  };
+})(jQuery);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-23">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-23">&#182;</a>
+              </div>
+              <p>Let&#39;s just start the widget so we can have our likes displayed ;)</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>$(<span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
+  <span class="string">"use strict"</span>;
+  $(<span class="string">'.readme_container'</span>).hull_like({
+    select: <span class="string">'p,h1,h2,h3,h4,h5,h6,li'</span>,
+    file: <span class="string">'./README.md'</span>
+  });
+});</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>

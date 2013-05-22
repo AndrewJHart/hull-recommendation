@@ -1,0 +1,70 @@
+.users > li{
+  display:inline;
+}
+  .users-picture{
+    border-radius:1px;
+    margin-bottom:4px;
+  }
+
+.popover{
+  min-width:260px;
+}
+.popover-title{
+  text-align:center;
+}
+
+h1.logo{
+  display: block;
+  margin: 0 0 40px;
+  width: 240px;
+  height: 93px;
+  background:url(logo.png);
+  text-indent: -10000%;
+  font-size: 0;
+  color:transparent;
+  line-height: 0;
+}
+
+.readme_container [data-likes]{
+  position: relative;
+  cursor: help;
+}
+.readme_container [data-likes].well{
+  cursor: default;
+}
+
+.readme_container [data-likes]:before{
+    content: attr(data-likes);
+    position:absolute;
+    top:50%;
+    right:100%;
+    margin-right:25px;
+    margin-top:-10px;
+    font-size:12px;
+    font-weight:bold;
+    text-align:center;
+    padding:0 6px;
+    height:20px;
+    line-height: 20px;
+    border-radius:2px;
+    color:#fff;
+    background:rgba(0,0,0,.25);
+    opacity:.25;
+    -moz-transition: opacity 100ms ease-in;
+    -webkit-transition: opacity 100ms ease-in;
+    transition: opacity 100ms ease-in;
+  }
+  .readme_container [data-likes]:hover:before,
+  .readme_container [data-likes].well:before{
+    opacity:1;
+  }
+  .readme_container [data-likes].well:before{
+    background-color:rgba(69, 135, 206, .9);
+  }
+  .readme_container li[data-likes]:before{
+    margin-right:50px;
+  }
+  .readme_container blockquote p[data-likes]:before{
+    margin-right:44px;
+  }
+ 
