@@ -61,4 +61,10 @@ h1.logo{
   .readme_container [data-likes].well:before{
     background-color:rgba(69, 135, 206, .9);
   }
+  .readme_container li[data-likes]:before{
+    margin-right:50px;
+  }
+  .readme_container blockquote p[data-likes]:before{
+    margin-right:44px;
+  }
  
