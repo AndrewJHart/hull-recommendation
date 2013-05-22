@@ -18,8 +18,8 @@ once logged in with Twitter, can review these entities.
 
 ### Source code, please!
 
-The magic is contained in the file located at `app/scripts/popover.js`, which you can see the
-[complete annotated source code here](./docs/popover.html);
+The magic is contained in the file located at `app/scripts/popover.js`, which
+[complete annotated source code is available here](./docs/popover.html);
 
 The complete source code of the project is available [here on github](http://github.com/hull/review_demo).
 Please note that the project has been generated with our [grunt-init template](https://github.com/hull/grunt-init-hull),
@@ -49,6 +49,13 @@ grunt server
 ```
 
 `grunt server` will start a server listening on port `9000` which you can use for development purpose.
+
+### Use in your own project
+
+Everything that is needed to enable these functionnalities for your app (apart from `hull.js`) is contained in a single `jQuery` plugin,
+which you can find in the file `app/scripts/popover.js`.
+
+This file also bootstraps the demo, to give an overview of the expected parameters.
 
 ## Want moar ?
 
