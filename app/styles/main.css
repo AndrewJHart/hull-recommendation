@@ -16,19 +16,52 @@
 h1.logo{
   display: block;
   margin: 0 0 40px;
-  width: 300px;
-  height: 116px;
-  background: transparent url(logo.png) no-repeat 0 0;
-  vertical-align: top;
+  width: 240px;
+  height: 93px;
+  background:url(logo.png);
   text-indent: -10000%;
   font-size: 0;
   color:transparent;
   line-height: 0;
 }
 
-.readme_container p:before,h1:before,h2:before,h3:before,h4:before,h5:before,h6:before,li:before {
-  content: attr(data-likes) " ✔ ";
+.readme_container [data-likes]{
+  position: relative;
+  cursor: help;
 }
-.popover p:before, .popover h1:before,.popover h2:before,.popover h3:before,.popover h4:before,.popover h5:before,.popover h6:before,.popover li:before {
-  content: "";
+.readme_container [data-likes].well{
+  cursor: default;
 }
+
+.readme_container [data-likes]:before{
+    content: attr(data-likes);
+    position:absolute;
+    top:50%;
+    right:100%;
+    margin-right:25px;
+    margin-top:-10px;
+    font-size:12px;
+    font-weight:bold;
+    text-align:center;
+    padding:0 6px;
+    height:20px;
+    line-height: 20px;
+    border-radius:2px;
+    color:#fff;
+    background:rgba(0,0,0,.25);
+    opacity:.25;
+    -moz-transition: opacity 100ms ease-in;
+    -webkit-transition: opacity 100ms ease-in;
+    transition: opacity 100ms ease-in;
+  }
+  .readme_container [data-likes]:hover:before,
+  .readme_container [data-likes].well:before{
+    opacity:1;
+  }
+  .readme_container [data-likes].well:before{
+    background-color:rgba(69, 135, 206, .9);
+  }
+  .readme_container [data-likes="0"]:before{
+    display:none;
+  }
+
