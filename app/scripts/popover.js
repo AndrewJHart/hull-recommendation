@@ -252,7 +252,7 @@
 $(function () {
   "use strict";
   $('.readme_container').hull_like({
-    select: 'p,h1,h2,h3,h4,h5,h6,ul',
+    select: 'p,h1,h2,h3,h4,h5,h6,li',
     file: './README.md'
   });
 });
