@@ -16,15 +16,6 @@ More precisely, with hull.io's API, we will on the fly create _entities_ within 
 (those entities being the paragraphs and headings of the document) so the readers,
 once logged in with Twitter, can review these entities.
 
-### Source code, please!
-
-The magic is contained in the file located at `app/scripts/popover.js`, which
-[complete annotated source code is available here](./docs/popover.html);
-
-The complete source code of the project is available [here on github](http://github.com/hull/review_demo).
-Please note that the project has been generated with our [grunt-init template](https://github.com/hull/grunt-init-hull),
-which we encourage you to use to get started.
-
 ## I want to play with it
 
 The demo is located on [github pages](http://hull.github.io/review_demo).
@@ -34,6 +25,14 @@ Head on to the demo page and click on any paragraph or heading, a popover will s
 * a Login button if you're not logged in yet
 * a (un)Recommend button with the associated number of recommendations for the selected entity
 
+## Source code, please!
+
+The magic is contained in the file located at `app/scripts/popover.js`, which
+[complete annotated source code is available here](./docs/popover.html);
+
+The complete source code of the project is available [here on github](http://github.com/hull/review_demo).
+Please note that the project has been generated with our [grunt-init template](https://github.com/hull/grunt-init-hull),
+which we encourage you to use to get started.
 
 ## Fork and Install
 
