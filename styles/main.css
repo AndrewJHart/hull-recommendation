@@ -4,6 +4,8 @@
   .users-picture{
     border-radius:1px;
     margin-bottom:4px;
+    width:50px;
+    height:50px;
   }
 
 .popover{
@@ -54,8 +56,12 @@ h1.logo{
     -webkit-transition: opacity 100ms ease-in;
     transition: opacity 100ms ease-in;
   }
+  .readme_container [data-likes="0"]:before{
+    opacity:0;
+  }
   .readme_container [data-likes]:hover:before,
-  .readme_container [data-likes].well:before{
+  .readme_container [data-likes].well:before,
+  .readme_container [data-likes="0"]:hover:before{
     opacity:1;
   }
   .readme_container [data-likes].well:before{
