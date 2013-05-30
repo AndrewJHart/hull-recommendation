@@ -18,7 +18,7 @@ once logged in with Twitter, can review these entities.
 
 ## I want to play with it
 
-The demo is located on [github pages](http://hull.github.io/hull-like).
+The demo is located on [github pages](http://hull.github.io/hull-recommendation).
 
 Head on to the demo page and click on any paragraph or heading, a popover will show either:
 
@@ -30,7 +30,7 @@ Head on to the demo page and click on any paragraph or heading, a popover will s
 The magic is contained in the file located at `app/scripts/popover.js`, which
 [complete annotated source code is available here](./docs/popover.html);
 
-The complete source code of the project is available [here on github](http://github.com/hull/hull-like).
+The complete source code of the project is available [here on github](http://github.com/hull/hull-recommendation).
 Please note that the project has been generated with our [grunt-init template](https://github.com/hull/grunt-init-hull),
 which we encourage you to use to get started.
 
